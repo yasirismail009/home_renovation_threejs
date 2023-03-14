@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas, useFrame ,useLoader} from "@react-three/fiber";
 import {
   EffectComposer,
@@ -18,74 +18,104 @@ import { Vector3 } from "three";
 import Blue from '../../assets/blue.jpg'
 import White from '../../assets/white.png'
 import Threed from '../../assets/uploads_files_2397542_black_leather_chair.gltf'
+import Three2 from '../../assets/Tea_Table01.glb'
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-// import { PerspectiveCamera } from '@react-three/drei';
+import { Button } from "@mui/material";
 
-// function CarShow() {
-//   const meshRef = useRef(null);
-//   useFrame(() => {
-//     if(!meshRef.current){
-//       return;
-//     }
-//     meshRef.current.rotation.x +=0.01;
-//     meshRef.current.rotation.y +=0.01;
-//   });
-//   return (
-//     <>
-//       <OrbitControls target={[0, 0.35, 0]} maxPolarAngle={1.45} />
-
-//       <PerspectiveCamera makeDefault fov={100} position={[0, 0, 0]} />
-//       <mesh ref={meshRef} position={[1,1,1]}>
-//         <boxGeometry args={[4, 4, 4]} />
-//         <meshBasicMaterial color="red" />
-//       </mesh>
-//     </>
-//   );
-// }
-function Model({ position ,rotation}) {
+function Model({ position ,rotation,handleClick }) {
   const meshRef = useRef();
   const gltf = useLoader(GLTFLoader, Threed);
-
-  // useFrame(() => {
-  //   if (meshRef.current) {
-  //     meshRef.current.rotation.x += 0.01;
-  //     meshRef.current.rotation.y += 0.01;
-  //   }
-  // });
   useFrame(() => {
     if (meshRef.current) {
       meshRef.current.rotation.set(...rotation);
     }
   });
 
-  return(   <mesh ref={meshRef} position={position}><primitive object={gltf.scene} scale={[14, 14, 14]} /></mesh>);
+  return(   <mesh ref={meshRef} position={position} onClick={e=>{handleClick('model')}}><primitive object={gltf.scene} scale={[14, 14, 14]} /></mesh>);
+}
+function Model2({ position ,rotation,handleClick }) {
+  const meshRef = useRef();
+  const gltf = useLoader(GLTFLoader, Three2);
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.rotation.set(...rotation);
+    }
+  });
+
+  return(   <mesh ref={meshRef} position={position} onClick={e=>{handleClick('model2')}}><primitive object={gltf.scene} scale={[18, 18, 18]} /></mesh>);
 }
 
 function Scene() {
   const [modelPosition, setModelPosition] = useState([0, -25, 0]);
   const [rotation, setRotation] = useState([0, 0, 0]);
+  const [modelPosition2, setModelPosition2] = useState([0, -25, 0]);
+  const [rotation2, setRotation2] = useState([0, -10, 0]);
+  const [activeModel, setActiveModel] = useState("model");
 
   const handleForward = () => {
-    setModelPosition([modelPosition[0], modelPosition[1], modelPosition[2] - 1])
-    console.log("forward",modelPosition );
+    if(activeModel==="model"){
+      setModelPosition([modelPosition[0], modelPosition[1], modelPosition[2] - 1])
+    } else{
+      setModelPosition2([modelPosition2[0], modelPosition2[1], modelPosition2[2] - 1])
+    }
+   
   };
 
   const handleBackward = () => {
+    if(activeModel==="model"){
     setModelPosition([modelPosition[0], modelPosition[1], modelPosition[2] + 1]);
+  } else{
+    setModelPosition2([modelPosition2[0], modelPosition2[1], modelPosition2[2] + 1]);
+  }
+  };
+    const handleForwardLeft = () => {
+      if(activeModel==="model"){
+    setModelPosition([modelPosition[0] - 1, modelPosition[1], modelPosition[2]])
+  } else{
+    setModelPosition2([modelPosition2[0] - 1, modelPosition2[1], modelPosition2[2]])
+  }
+  };
+
+  const handleBackwardRight = () => {
+    if(activeModel==="model"){
+    setModelPosition([modelPosition[0]+ 1, modelPosition[1], modelPosition[2] ]);
+  } else{
+    setModelPosition2([modelPosition2[0]+ 1, modelPosition2[1], modelPosition2[2] ]);
+  }
   };
   const handleRotateLeft = () => {
+    if(activeModel==="model"){
     setRotation([0, rotation[1] - 0.1, 0]);
+  } else{
+    setRotation2([0, rotation2[1] - 0.1, 0]);
+  }
   };
 
   const handleRotateRight = () => {
+    if(activeModel==="model"){
     setRotation([0, rotation[1] + 0.1, 0]);
+  } else{
+    setRotation2([0, rotation2[1] + 0.1, 0]);
+  }
   };
+  const handleModelClick = (type) => {
+    alert(type)
+   setActiveModel(type)
+  };
+  
+// useEffect(()=>{
+//   alert(activeModel)
+// },[activeModel])
   return (
     <>
-      <button onClick={handleForward}>Move Forward</button>
-      <button onClick={handleBackward}>Move Backward</button>
-      <button onClick={handleRotateLeft}>Rotate Left</button>
-      <button onClick={handleRotateRight}>Rotate Right</button>
+    <div className="w-full flex flex-row items-center justify-between">
+      <Button variant="contained" style={{margin:"4px"}} onClick={handleForward}>Move Forward</Button>
+      <Button variant="contained"  style={{margin:"4px"}} onClick={handleBackward}>Move Backward</Button>
+           <Button variant="contained"  style={{margin:"4px"}} onClick={handleForwardLeft}>Move Left</Button>
+      <Button variant="contained"  style={{margin:"4px"}} onClick={handleBackwardRight}>Move Right</Button>
+      <Button variant="contained"  style={{margin:"4px"}} onClick={handleRotateLeft}>Rotate Left</Button>
+      <Button variant="contained"  style={{margin:"4px"}} onClick={handleRotateRight}>Rotate Right</Button>
+      </div>
     <Canvas>
        {/* Ceiling */}
        <mesh position={[0, 25, 0]}>
@@ -117,7 +147,8 @@ function Scene() {
       <ambientLight />
       <pointLight position={[10, 10, 10]} />
       <PerspectiveCamera makeDefault fov={75} position={[80, 20, 30]} />
-      <Model  position={modelPosition} rotation={rotation}/>
+      <Model  position={modelPosition} rotation={rotation} handleClick ={handleModelClick}/>
+      <Model2  position={modelPosition2} rotation={rotation2} handleClick ={handleModelClick}/>
     </Canvas>
     
       </>
