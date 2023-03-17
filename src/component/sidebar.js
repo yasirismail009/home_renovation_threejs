@@ -18,7 +18,9 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
-import Threejs from './threejsComponents/index';
+import Threejs from './threejsComponents/Scene';
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 const drawerWidth = 240;
 
@@ -145,7 +147,9 @@ export default function PersistentDrawerLeft() {
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
+        <DndProvider backend={HTML5Backend}>
         <Threejs/>
+        </DndProvider>
       </Main>
     </Box>
   );
